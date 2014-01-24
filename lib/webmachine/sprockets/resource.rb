@@ -11,7 +11,7 @@ module Webmachine
       end
 
       def resource_exists?
-        if @asset = @sprockets.find_asset(asset_path)
+        if @asset = self.class.sprockets.find_asset(asset_path)
           true
         else
           false
@@ -33,7 +33,7 @@ module Webmachine
 
       private
       def mime_type
-        @sprockets.content_type_of(asset_path)
+        self.class.sprockets.content_type_of(asset_path)
       end
 
       def asset_path
