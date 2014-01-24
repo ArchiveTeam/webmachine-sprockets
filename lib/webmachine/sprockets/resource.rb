@@ -1,5 +1,3 @@
-Enumerator = Enumerable::Enumerator unless Object.const_defined?(:Enumerator)
-
 module Webmachine
   module Sprockets
     class Resource < ::Webmachine::Resource
@@ -7,43 +5,43 @@ module Webmachine
         attr_accessor :sprockets
       end
 
-      def initialize
-        @rack_response = call_sprockets(rack_env)
+      def content_types_provided
+        return [['text/html', nil]] if mime_type.nil?
+        [[mime_type, :produce_asset]]
       end
 
-      def finish_request
-        response.code = @rack_response[0]
-        response.headers.clear
-        response.headers.merge!(@rack_response[1])
-        response.body = Enumerator.new(@rack_response[2]).to_a.join
+      def resource_exists?
+        if @asset = @sprockets.find_asset(asset_path)
+          true
+        else
+          false
+        end
+      end
+
+      def generate_etag
+        @asset.digest
+      end
+
+
+      def last_modified
+        @asset.mtime
+      end
+
+      def produce_asset
+        @asset.to_s
       end
 
       private
-
-      def call_sprockets(env)
-        self.class.sprockets.call(env)
+      def mime_type
+        @sprockets.content_type_of(asset_path)
       end
 
-      def rack_env
-        env = {
-          'PATH_INFO'    => '/' + logical_path,
-          'QUERY_STRING' => query_string
-        }
-        request.headers.each {|key, value| env[cgi_key(key)] = value }
-        env
-      end
-
-      def cgi_key(key)
-        key = key.upcase.gsub('-', '_')
-        key =~ /^Content-(Type|Length)$/ ? key : 'HTTP_' + key
-      end
-
-      def logical_path
-        request.path_tokens.join("/")
-      end
-
-      def query_string
-        request.uri.query.to_s
+      def asset_path
+        path = request.path_tokens.join('/')
+        if fingerprint = path[/-([0-9a-f]{7,40})\.[^.]+$/, 1]
+          path = path.sub("-#{fingerprint}", '')
+        end
+        path
       end
     end
   end
