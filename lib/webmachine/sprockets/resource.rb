@@ -17,6 +17,10 @@ module Webmachine
           false
         end
       end
+      
+      def forbidden?
+        asset_path.include?('..')
+      end
 
       def generate_etag
         @asset.digest
