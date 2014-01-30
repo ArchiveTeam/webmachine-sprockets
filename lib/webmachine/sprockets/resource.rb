@@ -43,7 +43,10 @@ module Webmachine
       def asset_path
         path = request.path_tokens.join('/')
         if fingerprint = path[/-([0-9a-f]{7,40})\.[^.]+$/, 1]
+          @expires = true
           path = path.sub("-#{fingerprint}", '')
+        else
+          @expires = false
         end
         path
       end
