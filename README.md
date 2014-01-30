@@ -22,8 +22,8 @@ MyApp = Webmachine::Application.new do |app|
   sprockets = Sprockets::Environment.new
   sprockets.append_path 'app/assets/javascripts'
 
-  resource = Webmachine::Sprockets.resource_for(sprockets)
-  app.add_route [ 'assets', '*' ], resource
+  Webmachine::Sprockets::Resource.sprockets = sprockets
+  app.add_route [ 'assets', '*' ], Webmachine::Sprockets::Resource
 end
 ```
 
