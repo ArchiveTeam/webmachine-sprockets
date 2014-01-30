@@ -5,14 +5,20 @@ require 'webmachine/sprockets'
 require 'test_server'
 Sprockets::Environment
 
+class Assets < Webmachine::Sprockets::Resource
+end
+
+class Indexes < Webmachine::Sprockets::Resource
+end
+
 class TestServer
   def webmachine_app(env)
     Webmachine::Application.new do |app|
-      assets = Webmachine::Sprockets.resource_for(env)
-      app.add_route [ 'assets', '*' ], assets
+      Assets.sprockets = env
+      app.add_route [ 'assets', '*' ], Assets
 
-      index = Webmachine::Sprockets.resource_for(env.index)
-      app.add_route [ 'cached', 'javascripts', '*' ], index
+      Indexes.sprockets = env.index
+      app.add_route [ 'cached', 'javascripts', '*' ], Indexes
     end
   end
 
