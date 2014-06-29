@@ -32,7 +32,7 @@ module Webmachine
       end
 
       def produce_asset
-        @asset.to_s
+        File.new(@asset.pathname, 'rb')
       end
 
       private
